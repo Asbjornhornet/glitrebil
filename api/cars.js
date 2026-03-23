@@ -11,9 +11,10 @@ export default async function handler(req, res) {
 
     const xml = await listRes.text();
 
+    // 🔹 hent ID’er
     const ids = [...xml.matchAll(/urn:id:(\d+)/g)]
       .map(m => m[1])
-      .slice(0, 8); // start med færre
+      .slice(0, 10);
 
     const cars = [];
 
@@ -30,14 +31,41 @@ export default async function handler(req, res) {
 
         const xmlAd = await resAd.text();
 
-        // 🔥 safe parsing
-        const title = (xmlAd.match(/<title>(.*?)<\/title>/) || [])[1] || '';
-        const price = (xmlAd.match(/<finn:price[^>]*>(.*?)<\/finn:price>/) || [])[1] || '';
-        const image = (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] || '';
-        const year = (xmlAd.match(/<finn:year>(.*?)<\/finn:year>/) || [])[1] || '';
-        const km = (xmlAd.match(/<finn:mileage>(.*?)<\/finn:mileage>/) || [])[1] || '';
+        // 🔥 TITLE
+        const title =
+          (xmlAd.match(/<title>(.*?)<\/title>/) || [])[1] || 'Bil';
 
-        cars.push({ id, title, price, image, year, km });
+        // 🔥 PRICE (flere varianter)
+        const price =
+          (xmlAd.match(/<finn:price-value[^>]*>(.*?)<\/finn:price-value>/) || [])[1] ||
+          (xmlAd.match(/<finn:price[^>]*>(.*?)<\/finn:price>/) || [])[1] ||
+          '';
+
+        // 🔥 IMAGE (flere varianter)
+        const image =
+          (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] ||
+          (xmlAd.match(/<finn:main-image[^>]*>(.*?)<\/finn:main-image>/) || [])[1] ||
+          '';
+
+        // 🔥 YEAR
+        const year =
+          (xmlAd.match(/<finn:year-from-reg>(.*?)<\/finn:year-from-reg>/) || [])[1] ||
+          (xmlAd.match(/<finn:year>(.*?)<\/finn:year>/) || [])[1] ||
+          '';
+
+        // 🔥 KM
+        const km =
+          (xmlAd.match(/<finn:mileage[^>]*>(.*?)<\/finn:mileage>/) || [])[1] ||
+          '';
+
+        cars.push({
+          id,
+          title,
+          price,
+          image,
+          year,
+          km
+        });
 
       } catch (err) {
         console.log('FEIL PÅ BIL:', id);
