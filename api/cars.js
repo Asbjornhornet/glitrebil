@@ -30,8 +30,12 @@ export default async function handler(req, res) {
           .trim();
 
         // 🔥 Pris
-        const priceMatch = html.match(/(\d[\d\s]+)/);
-        const price = priceMatch ? priceMatch[1] + ' kr' : '';
+const price =
+  (html.match(/"amount":\s?(\d+)/) || [])[1]
+    ? new Intl.NumberFormat('no-NO').format(
+        (html.match(/"amount":\s?(\d+)/) || [])[1]
+      ) + ' kr'
+    : '';
 
         // 🔥 KM
         const km =
