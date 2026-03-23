@@ -148,7 +148,7 @@ h2 {
   <p>Gratis verdivurdering • Rask respons</p>
 
   <form>
-    <input placeholder="AB12345">
+<input id="regnr" placeholder="AB12345">
     <input placeholder="Navn">
     <input placeholder="Telefon">
     <input placeholder="E-post">
@@ -163,6 +163,25 @@ h2 {
 </div>
 
 <script>
+  document.getElementById('regnr').addEventListener('input', async (e) => {
+  const value = e.target.value.toUpperCase();
+
+  if (value.length === 7) {
+    try {
+      const res = await fetch(`/api/regnr?regnr=${value}`);
+      const data = await res.json();
+
+      if (data.model) {
+        alert(
+          `${data.brand} ${data.model} (${data.year})\n${data.fuel} • ${data.power}`
+        );
+      }
+
+    } catch (err) {
+      console.log('lookup feil');
+    }
+  }
+});
 async function loadCars() {
   try {
     const res = await fetch('/api/cars');
