@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glitrebil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body class="bg-gray-950 text-white">
+
+<script>
+const supabase = window.supabase.createClient(
+  'https://isusobbmebxnxqekteyg.supabase.co',
+  'sb_publishable_rYhzegMXH7pHOWSjf6-woA_44dLyMgA'
+);
+</script>
+
+<section class="py-20 text-center">
+  <h1 class="text-5xl font-bold mb-4">Selg bilen din</h1>
+  <p class="text-gray-400 mb-8">Gratis verdivurdering</p>
+
+  <form id="leadForm" class="max-w-md mx-auto grid gap-4">
+    <input id="regnr" placeholder="AB12345" class="p-3 text-black rounded">
+    <div id="carPreview" class="hidden text-sm"></div>
+    <input id="name" placeholder="Navn" class="p-3 text-black rounded">
+    <input id="phone" placeholder="Telefon" class="p-3 text-black rounded">
+    <input id="email" placeholder="E-post" class="p-3 text-black rounded">
+    <button class="bg-white text-black p-3 rounded">Send</button>
+  </form>
+</section>
+
+<section class="p-10">
+  <h2 class="text-2xl mb-6 text-center">Biler til salgs</h2>
+  <div id="car-list" class="grid md:grid-cols-3 gap-6"></div>
+</section>
+
+<script>
+document.getElementById('leadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  await supabase.from('leads').insert([{
+    name: document.getElementById('name').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    regnr: document.getElementById('regnr').value,
+    status: 'ny'
+  }]);
+
+  alert('Lead lagret');
+});
+
+async function loadCars() {
+  try {
+    const res = await fetch('/api/cars');
+    const cars = await res.json();
+
+    document.getElementById('car-list').innerHTML = cars.map(car => `
+      <div class="bg-gray-800 p-4 rounded">
+        <img src="${car.image || ''}" class="mb-2" />
+        <h3>${car.title || ''}</h3>
+        <p>${car.price || ''} kr</p>
+      </div>
+    `).join('');
+  } catch {
+    document.getElementById('car-list').innerHTML = '<p>Kunne ikke laste biler</p>';
+  }
+}
+
+loadCars();
+</script>
+
+</body>
+</html>
