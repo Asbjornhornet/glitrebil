@@ -1,7 +1,6 @@
 export default async function handler(req, res) {
   try {
-    // 🔹 1. Hent liste
-    const listRes = await fetch(
+    const response = await fetch(
       'https://cache.api.finn.no/iad/search/car-norway?orgId=898948523',
       {
         headers: {
@@ -10,44 +9,23 @@ export default async function handler(req, res) {
       }
     );
 
-    const listText = await listRes.text();
+    const xml = await response.text();
 
-    // 🔹 2. Finn ID’er (regex hack – funker bra)
-    const ids = [...listText.matchAll(/urn:id:(\\d+)/g)].map(m => m[1]);
+    // 👉 hent titler direkte fra XML (enkel parsing først)
+    const titles = [...xml.matchAll(/<title>(.*?)<\/title>/g)]
+      .map(m => m[1])
+      .filter(t => t !== 'Biler til salgs')
+      .slice(0, 12);
 
-    const firstIds = ids.slice(0, 12); // maks 12 biler
+    const cars = titles.map(title => ({
+      title,
+      price: '',
+      image: '',
+      year: '',
+      km: ''
+    }));
 
-    // 🔹 3. Hent detaljer per bil
-    const cars = await Promise.all(
-      firstIds.map(async (id) => {
-        try {
-          const res = await fetch(
-            `https://cache.api.finn.no/iad/ad/${id}`,
-            {
-              headers: {
-                'X-FINN-apikey': process.env.FINN_API_KEY,
-                'Accept': 'application/json'
-              }
-            }
-          );
-
-          const data = await res.json();
-
-          return {
-            title: data.heading,
-            price: data.price?.amount || '',
-            image: data.images?.[0]?.url || '',
-            year: data.modelYear || '',
-            km: data.mileage || ''
-          };
-
-        } catch {
-          return null;
-        }
-      })
-    );
-
-    res.status(200).json(cars.filter(Boolean));
+    res.status(200).json(cars);
 
   } catch (err) {
     console.error(err);
