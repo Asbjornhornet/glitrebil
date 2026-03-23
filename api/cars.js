@@ -11,10 +11,9 @@ export default async function handler(req, res) {
 
     const xml = await listRes.text();
 
-    // 🔹 hent ID’er
     const ids = [...xml.matchAll(/urn:id:(\d+)/g)]
       .map(m => m[1])
-      .slice(0, 10);
+      .slice(0, 8);
 
     const cars = [];
 
@@ -31,32 +30,25 @@ export default async function handler(req, res) {
 
         const xmlAd = await resAd.text();
 
-        // 🔥 TITLE
+        // TITLE
         const title =
           (xmlAd.match(/<title>(.*?)<\/title>/) || [])[1] || 'Bil';
 
-        // 🔥 PRICE (flere varianter)
+        // PRICE (fra category)
         const price =
-          (xmlAd.match(/<finn:price-value[^>]*>(.*?)<\/finn:price-value>/) || [])[1] ||
-          (xmlAd.match(/<finn:price[^>]*>(.*?)<\/finn:price>/) || [])[1] ||
-          '';
+          (xmlAd.match(/<category term=\"price\" label=\"(.*?)\"/) || [])[1] || '';
 
-        // 🔥 IMAGE (flere varianter)
-        const image =
-          (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] ||
-          (xmlAd.match(/<finn:main-image[^>]*>(.*?)<\/finn:main-image>/) || [])[1] ||
-          '';
-
-        // 🔥 YEAR
-        const year =
-          (xmlAd.match(/<finn:year-from-reg>(.*?)<\/finn:year-from-reg>/) || [])[1] ||
-          (xmlAd.match(/<finn:year>(.*?)<\/finn:year>/) || [])[1] ||
-          '';
-
-        // 🔥 KM
+        // KM
         const km =
-          (xmlAd.match(/<finn:mileage[^>]*>(.*?)<\/finn:mileage>/) || [])[1] ||
-          '';
+          (xmlAd.match(/<category term=\"mileage\" label=\"(.*?)\"/) || [])[1] || '';
+
+        // YEAR
+        const year =
+          (xmlAd.match(/<category term=\"year\" label=\"(.*?)\"/) || [])[1] || '';
+
+        // IMAGE (fra link)
+        const image =
+          (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] || '';
 
         cars.push({
           id,
@@ -68,14 +60,14 @@ export default async function handler(req, res) {
         });
 
       } catch (err) {
-        console.log('FEIL PÅ BIL:', id);
+        console.log('Feil på bil:', id);
       }
     }
 
     res.status(200).json(cars);
 
   } catch (err) {
-    console.error('TOTAL ERROR:', err);
+    console.error(err);
     res.status(500).json({ error: 'fail' });
   }
 }
