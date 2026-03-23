@@ -1,43 +1,93 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont;
+  background: #020817;
+  color: white;
+}
+
+/* NAV */
 .nav {
+  position: fixed;
+  width: 100%;
+  padding: 20px 40px;
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-  background: #020817;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
 }
 
-.menu a {
-  margin-left: 15px;
-  color: white;
+.nav a {
+  margin-left: 20px;
   text-decoration: none;
+  color: white;
 }
 
+/* HERO */
 .hero {
-  height: 80vh;
-  background: url("https://images.unsplash.com/photo-1494976388531-d1058494cdd8") center/cover;
+  height: 100vh;
+  background: url("https://images.unsplash.com/photo-1493238792000-8113da705763") center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
 }
 
 .hero-content {
-  position: relative;
   text-align: center;
+  max-width: 600px;
+}
+
+/* FORM */
+.form {
+  margin-top: 20px;
+  padding: 25px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+}
+
+.form input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+}
+
+.form button {
+  width: 100%;
+  padding: 14px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 8px;
   color: white;
 }
 
-.cars-section {
-  padding: 40px;
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 20px;
+  padding: 60px;
 }
 
-.services {
-  display: flex;
-  gap: 20px;
-  padding: 40px;
+.card {
+  background: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 15px;
 }
