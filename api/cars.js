@@ -1,13 +1,5 @@
-import { XMLParser } from 'fast-xml-parser';
-
 export default async function handler(req, res) {
   try {
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: ''
-    });
-
-    // 🔹 hent liste
     const listRes = await fetch(
       'https://cache.api.finn.no/iad/search/car-norway?orgId=898948523',
       {
@@ -17,69 +9,36 @@ export default async function handler(req, res) {
       }
     );
 
-    const listXml = await listRes.text();
-    const listJson = parser.parse(listXml);
+    const xml = await listRes.text();
 
-    const entries = listJson.feed.entry || [];
-
-    const ids = entries
-      .map(e => e.id?.split(':').pop())
-      .filter(Boolean)
+    const ids = [...xml.matchAll(/urn:id:(\d+)/g)]
+      .map(m => m[1])
       .slice(0, 8);
 
     const cars = [];
 
     for (const id of ids) {
       try {
-        const resAd = await fetch(
-          `https://cache.api.finn.no/iad/ad/${id}`,
-          {
-            headers: {
-              'X-FINN-apikey': process.env.FINN_API_KEY
-            }
-          }
-        );
-
-        const xml = await resAd.text();
-        const json = parser.parse(xml);
-
-        const entry = json.entry;
+        // 👉 Hent FINN annonse HTML
+        const pageRes = await fetch(`https://www.finn.no/mobility/item/${id}`);
+        const html = await pageRes.text();
 
         // 🔥 TITLE
-        const title = entry.title || 'Bil';
+        const title =
+          (html.match(/<title>(.*?)<\/title>/) || [])[1]?.split('|')[0] || 'Bil';
 
-        // 🔥 CATEGORY → key/value
-        const categories = entry.category || [];
-        const map = {};
+        // 🔥 PRICE
+        const price =
+          (html.match(/(\d[\d\s]+kr)/) || [])[1] || '';
 
-        categories.forEach(c => {
-          if (c.term && c.label) {
-            map[c.term.toLowerCase()] = c.label;
-          }
-        });
+        // 🔥 KM
+        const km =
+          (html.match(/(\d[\d\s]+km)/) || [])[1] || '';
+
+        // 🔥 YEAR
+        const year =
+          (html.match(/\b(20\d{2}|19\d{2})\b/) || [])[1] || '';
 
         // 🔥 IMAGE
-        const links = entry.link || [];
-        const imageLink = links.find(l => l.rel === 'image');
-
-        cars.push({
-          id,
-          title,
-          price: map.price || map.totalprice || '',
-          km: map.mileage || '',
-          year: map.year || '',
-          image: imageLink?.href || ''
-        });
-
-      } catch (e) {
-        console.log('Feil på bil:', id);
-      }
-    }
-
-    res.status(200).json(cars);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'fail' });
-  }
-}
+        const image =
+          (html.match(/property=\"og:image\" content=\"(.*?)\"/) || [])[
