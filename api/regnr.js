@@ -1,40 +1,43 @@
 export default async function handler(req, res) {
   const { regnr } = req.query;
 
+  if (!regnr) {
+    return res.status(400).json({ error: "Missing regnr" });
+  }
+
   try {
     const response = await fetch(
-      `https://cache.api.finn.no/iad/search/car-norway?registration=${regnr}`
+      `https://api.vegvesen.no/kjoretoy/kjoretoydata?kjennemerke=${regnr}`,
+      {
+        headers: {
+          "SVV-Authorization": "Apikey DEMO",
+        },
+      }
     );
 
-    const text = await response.text();
+    const data = await response.json();
 
-    // 🔥 DEBUG
-    console.log("RAW:", text.slice(0, 300));
-
-    // ❌ Hvis FINN blocker / feil
-    if (text.includes("403") || text.includes("Forbidden")) {
-      return res.status(200).json({
-        error: "FINN blokkerer request (403)"
-      });
+    if (!data.kjoretoydataListe || data.kjoretoydataListe.length === 0) {
+      return res.status(200).json({ error: "Fant ikke kjøretøy" });
     }
 
-    // ❌ Hvis XML (ikke JSON)
-    if (text.startsWith("<?xml")) {
-      return res.status(200).json({
-        error: "Fikk XML fra FINN – ikke JSON"
-      });
-    }
+    const vehicle = data.kjoretoydataListe[0];
 
-    const data = JSON.parse(text);
+    const info = {
+      brand: vehicle.kjoretoyId?.tekniskGodkjenning?.tekniskeData?.generelt?.merke || "",
+      model: vehicle.kjoretoyId?.tekniskGodkjenning?.tekniskeData?.generelt?.handelsbetegnelse || "",
+      year: vehicle.kjoretoyId?.forstegangsregistrering?.registrertFørsteGangNorge || "",
+      fuel: vehicle.kjoretoyId?.tekniskGodkjenning?.tekniskeData?.motorOgDrivverk?.drivstoff?.drivstoffKode || "",
+    };
 
-    return res.status(200).json(data);
+    return res.status(200).json(info);
 
   } catch (err) {
-    console.error("REGNR ERROR:", err);
+    console.error("VEGVESEN ERROR:", err);
 
     return res.status(500).json({
       error: "Server error",
-      details: err.message
+      details: err.message,
     });
   }
 }
