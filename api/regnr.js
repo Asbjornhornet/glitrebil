@@ -1,26 +1,26 @@
 export default async function handler(req, res) {
-  const { regnr } = req.query;
+  const regnr = req.query.regnr;
 
   try {
-    const response = await fetch(
-      `https://api.vegvesen.no/kjoretoy/kjoretoydata?kjennemerke=${regnr}`,
+    const r = await fetch(
+      `https://api.vegvesen.no/vehicles/v1/vehicles?registrationNumber=${regnr}`,
       {
         headers: {
-          "SVV-Authorization": process.env.VEGVESEN_API_KEY
+          "SVV-Authorization": process.env.VEGVESEN_KEY
         }
       }
     );
 
-    const data = await response.json();
-    const v = data.kjoretoydataListe?.[0];
+    const data = await r.json();
+    const car = data[0];
 
-    res.status(200).json({
-      brand: v?.tekniskGodkjenning?.tekniskeData?.generelt?.merke,
-      model: v?.tekniskGodkjenning?.tekniskeData?.generelt?.handelsbetegnelse,
-      year: v?.forstegangsregistrering?.registrertForstegangNorge
+    res.json({
+      brand: car.make,
+      model: car.model,
+      year: car.modelYear
     });
 
   } catch {
-    res.status(500).json({ error: "feil" });
+    res.status(500).json({error:true});
   }
 }
