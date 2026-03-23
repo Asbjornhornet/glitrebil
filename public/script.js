@@ -1,45 +1,45 @@
-const carsContainer = document.getElementById("cars");
-
 async function loadCars() {
   const res = await fetch("/api/cars");
   const cars = await res.json();
 
-  renderCars(cars);
-}
+  const container = document.getElementById("cars");
 
-function renderCars(cars) {
-  carsContainer.innerHTML = cars.map(car => `
+  container.innerHTML = cars.map(car => `
     <div class="card" onclick="window.open('${car.url}')">
       <img src="${car.image}" />
       <div class="card-content">
-        <h4>${car.title}</h4>
-        <p>${car.price}</p>
+        <h3>${car.title}</h3>
+        <div class="price">${car.price}</div>
       </div>
     </div>
   `).join("");
 }
 
-async function lookupRegnr(value) {
-  const res = await fetch(`/api/regnr?regnr=${value}`);
-  const data = await res.json();
+/* REGNR LOOKUP */
+document.getElementById("regnr").addEventListener("input", async (e) => {
+  const value = e.target.value.toUpperCase();
 
-  if(data.model){
-    document.getElementById("bil").value =
-      `${data.brand} ${data.model} (${data.year})`;
-  }
-}
+  if (value.length === 7) {
+    try {
+      const res = await fetch(`/api/regnr?regnr=${value}`);
+      const data = await res.json();
 
-document.getElementById("regnr").addEventListener("input", (e)=>{
-  if(e.target.value.length >= 7){
-    lookupRegnr(e.target.value);
+      if (data.model) {
+        document.getElementById("bil").value =
+          `${data.brand} ${data.model} (${data.year})`;
+      }
+    } catch {
+      console.log("lookup feil");
+    }
   }
 });
 
-document.getElementById("form").addEventListener("submit", async (e)=>{
+/* SEND LEAD */
+document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   await fetch("/api/lead", {
-    method:"POST",
+    method: "POST",
     body: JSON.stringify({
       name: navn.value,
       phone: telefon.value,
@@ -48,7 +48,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     })
   });
 
-  alert("Lead sendt 🚀");
+  alert("Takk! Vi kontakter deg 🚀");
 });
 
 loadCars();
