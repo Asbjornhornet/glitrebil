@@ -1,22 +1,26 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch('https://cache.api.finn.no/iad/', {
-      headers: {
-        'X-FINN-apikey': process.env.FINN_API_KEY
+    const response = await fetch(
+      'https://cache.api.finn.no/iad/search?orgId=898948523',
+      {
+        headers: {
+          'X-FINN-apikey': process.env.FINN_API_KEY
+        }
       }
-    });
+    );
 
     const data = await response.json();
+    console.log('FINN DATA:', data);
 
-    console.log(data); // viktig for debug
+    const items = data._embedded?.items || [];
 
-    const cars = data.docs?.map(car => ({
-      title: car.heading,
-      price: car.price?.amount,
-      image: car.images?.[0]?.url,
-      year: car.modelYear,
-      km: car.mileage
-    })) || [];
+    const cars = items.map(car => ({
+      title: car.heading || 'Bil',
+      price: car.price?.amount || '',
+      image: car.images?.[0]?.url || '',
+      year: car.modelYear || '',
+      km: car.mileage || ''
+    }));
 
     res.status(200).json(cars);
 
