@@ -1,77 +1,48 @@
-const regnrInput = document.getElementById("regnr");
-const carInput = document.getElementById("car");
-const info = document.getElementById("carInfo");
+const loading = document.getElementById("loading");
+const result = document.getElementById("result");
 
-// 🔥 PREMIUM LOADING UI
-function setLoading(state) {
-  if (state) {
-    regnrInput.style.border = "2px solid #3b82f6";
-    regnrInput.style.boxShadow = "0 0 20px rgba(59,130,246,0.5)";
-  } else {
-    regnrInput.style.border = "";
-    regnrInput.style.boxShadow = "";
-  }
-}
-
-// 🚗 LOOKUP
-regnrInput.addEventListener("input", async (e) => {
+// REGNR LOOKUP
+regnr.addEventListener("input", async (e) => {
   const value = e.target.value.toUpperCase();
 
-  if (value.length === 7) {
-    setLoading(true);
+  if (value.length >= 7) {
+    loading.style.display = "block";
 
     try {
       const res = await fetch(`/api/regnr?regnr=${value}`);
       const data = await res.json();
 
-      setLoading(false);
-
-      if (data.error) {
-        info.innerText = "Fant ikke bil";
-        return;
+      if (data.model) {
+        bil.value = `${data.brand} ${data.model}`;
+        result.innerText = `${data.brand} ${data.model} (${data.year})`;
+      } else {
+        result.innerText = "Fant ikke bil";
       }
 
-      // ✅ Autofyll
-      const carText = `${data.brand} ${data.model}`;
-      carInput.value = carText;
-
-      // ✨ Premium animation
-      carInput.style.transform = "scale(1.05)";
-      setTimeout(() => {
-        carInput.style.transform = "scale(1)";
-      }, 200);
-
-      info.innerText = `${carText} (${data.year})`;
-
-    } catch (err) {
-      setLoading(false);
-      info.innerText = "Feil ved lookup";
+    } catch {
+      result.innerText = "Feil ved oppslag";
     }
+
+    loading.style.display = "none";
   }
 });
 
-// 📤 SEND LEAD
-document.getElementById("submitBtn").addEventListener("click", async () => {
-  const payload = {
-    regnr: regnrInput.value,
-    car: carInput.value,
-    name: document.getElementById("name").value,
-    phone: document.getElementById("phone").value,
-    email: document.getElementById("email").value,
-  };
 
-  const btn = document.getElementById("submitBtn");
-
-  btn.innerText = "Sender...";
-  btn.disabled = true;
+// SEND LEAD
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
   await fetch("/api/lead", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      regnr: regnr.value,
+      bil: bil.value,
+      navn: navn.value,
+      telefon: telefon.value,
+      epost: epost.value
+    })
   });
 
-  btn.innerText = "Sendt ✅";
+  window.location.href = "/takk.html";
 });
