@@ -1,1 +1,60 @@
+body {
+  margin: 0;
+  font-family: Arial;
+}
 
+.hero {
+  height: 100vh;
+  background: url("https://images.unsplash.com/photo-1503376780353-7e6692767b70") center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+}
+
+.content {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+
+.form {
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.form input {
+  display: block;
+  width: 280px;
+  margin: 10px auto;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+}
+
+button {
+  background: #3b82f6;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  width: 280px;
+}
+
+#loading {
+  display: none;
+  margin-top: 10px;
+}
+
+.trust {
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.8;
+}
