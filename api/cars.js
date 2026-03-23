@@ -38,12 +38,16 @@ const price =
     : '';
 
         // 🔥 KM
-        const km =
-          (html.match(/(\d[\d\s]+km)/) || [])[1] || '';
+const km =
+  (html.match(/"mileage":\s?(\d+)/) || [])[1]
+    ? new Intl.NumberFormat('no-NO').format(
+        (html.match(/"mileage":\s?(\d+)/) || [])[1]
+      ) + ' km'
+    : '';
 
         // 🔥 År
-        const year =
-          (html.match(/\b(20\d{2}|19\d{2})\b/) || [])[1] || '';
+const year =
+  (html.match(/"modelYear":\s?(\d{4})/) || [])[1] || '';
 
         // 🔥 Bilde
         const image =
