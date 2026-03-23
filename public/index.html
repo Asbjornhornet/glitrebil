@@ -2,150 +2,46 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8" />
-  <title>Glitre Bil</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #020617;
-      color: white;
-      text-align: center;
-    }
-
-    .hero {
-      padding: 100px 20px;
-    }
-
-    h1 {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 12px;
-      width: 300px;
-      border-radius: 8px;
-      border: none;
-      transition: all 0.2s ease;
-    }
-
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: white;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-    }
-
-    #carInfo {
-      margin-top: 10px;
-      color: #93c5fd;
-    }
-  </style>
+  <title>Selg bilen din | Glitre Bil</title>
+  <link rel="stylesheet" href="/public/style.css" />
 </head>
-
 <body>
 
-  <div class="hero">
-    <h1>Glitre Bil</h1>
-    <p>Gratis verdivurdering • Rask respons</p>
+<section class="hero">
 
-    <input id="regnr" placeholder="AB12345" />
-    <input id="car" placeholder="Bil" />
-    <input id="name" placeholder="Navn" />
-    <input id="phone" placeholder="Telefon" />
-    <input id="email" placeholder="E-post" />
+  <div class="overlay"></div>
 
-    <button id="submitBtn">Få tilbud</button>
+  <div class="content">
 
-    <div id="carInfo"></div>
+    <h1>Selg bilen din på 2 minutter</h1>
+    <p>Få tilbud raskt • Helt gratis • Ingen forpliktelser</p>
+
+    <form id="form" class="form">
+
+      <input id="regnr" placeholder="Skriv regnr (AB12345)" />
+      <input id="bil" placeholder="Bil" />
+
+      <input id="navn" placeholder="Navn" />
+      <input id="telefon" placeholder="Telefon" />
+      <input id="epost" placeholder="E-post" />
+
+      <button>Få tilbud</button>
+
+      <div id="loading">🔍 Henter bilinfo...</div>
+      <div id="result"></div>
+
+    </form>
+
+    <p class="trust">
+      ✔ Gratis vurdering  
+      ✔ Rask respons  
+      ✔ Trygg handel
+    </p>
+
   </div>
 
-  <script>
-    const regnrInput = document.getElementById("regnr");
-    const carInput = document.getElementById("car");
-    const info = document.getElementById("carInfo");
+</section>
 
-    function setLoading(state) {
-      if (state) {
-        regnrInput.style.border = "2px solid #3b82f6";
-        regnrInput.style.boxShadow = "0 0 20px rgba(59,130,246,0.5)";
-      } else {
-        regnrInput.style.border = "";
-        regnrInput.style.boxShadow = "";
-      }
-    }
-
-    // 🚗 LOOKUP
-    regnrInput.addEventListener("input", async (e) => {
-      const value = e.target.value.toUpperCase();
-
-      if (value.length === 7) {
-        setLoading(true);
-
-        try {
-          const res = await fetch(`/api/regnr?regnr=${value}`);
-          const data = await res.json();
-
-          setLoading(false);
-
-          if (data.error) {
-            info.innerText = "Fant ikke bil";
-            return;
-          }
-
-          const carText = `${data.brand} ${data.model}`;
-          carInput.value = carText;
-
-          // ✨ animation
-          carInput.style.transform = "scale(1.05)";
-          setTimeout(() => {
-            carInput.style.transform = "scale(1)";
-          }, 200);
-
-          info.innerText = `${carText} (${data.year})`;
-
-        } catch (err) {
-          setLoading(false);
-          info.innerText = "Feil ved lookup";
-        }
-      }
-    });
-
-    // 📤 SEND LEAD
-    document.getElementById("submitBtn").addEventListener("click", async () => {
-      const payload = {
-        regnr: regnrInput.value,
-        car: carInput.value,
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        email: document.getElementById("email").value,
-      };
-
-      const btn = document.getElementById("submitBtn");
-
-      btn.innerText = "Sender...";
-      btn.disabled = true;
-
-      await fetch("/api/lead", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      btn.innerText = "Sendt ✅";
-    });
-  </script>
-
+<script src="/public/script.js"></script>
 </body>
 </html>
