@@ -2,44 +2,59 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8" />
-  <title>Selg bilen din | Glitre Bil</title>
+  <title>Glitre Bil</title>
   <link rel="stylesheet" href="/public/style.css" />
 </head>
 <body>
 
-<section class="hero">
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">Glitre Bil</div>
+  <div class="menu">
+    <a href="/">Hjem</a>
+    <a href="/biler.html">Biler</a>
+    <a href="/verksted.html">Verksted</a>
+    <a href="/deler.html">Deler</a>
+    <a href="/fluid-film.html">Fluid Film</a>
+    <a href="/om.html">Om oss</a>
+    <a href="/kontakt.html">Kontakt</a>
+  </div>
+</nav>
 
+<!-- HERO -->
+<section class="hero">
   <div class="overlay"></div>
 
-  <div class="content">
-
-    <h1>Selg bilen din på 2 minutter</h1>
-    <p>Få tilbud raskt • Helt gratis • Ingen forpliktelser</p>
+  <div class="hero-content">
+    <h1>Glitre Bil</h1>
+    <p>Kjøp og salg av bruktbil • Verksted • Deler</p>
 
     <form id="form" class="form">
-
-      <input id="regnr" placeholder="Skriv regnr (AB12345)" />
+      <input id="regnr" placeholder="Skriv regnr" />
       <input id="bil" placeholder="Bil" />
-
       <input id="navn" placeholder="Navn" />
       <input id="telefon" placeholder="Telefon" />
       <input id="epost" placeholder="E-post" />
-
       <button>Få tilbud</button>
 
-      <div id="loading">🔍 Henter bilinfo...</div>
+      <div id="loading">Henter data...</div>
       <div id="result"></div>
-
     </form>
-
-    <p class="trust">
-      ✔ Gratis vurdering  
-      ✔ Rask respons  
-      ✔ Trygg handel
-    </p>
-
   </div>
+</section>
 
+<!-- BILER -->
+<section class="cars-section">
+  <h2>Biler til salgs</h2>
+  <div id="cars" class="grid"></div>
+</section>
+
+<!-- TJENESTER -->
+<section class="services">
+  <div class="card">🚗 Bruktbil</div>
+  <div class="card">🛠 Verksted (Bosch)</div>
+  <div class="card">🧰 Deler</div>
+  <div class="card">🛢 Fluid Film</div>
 </section>
 
 <script src="/public/script.js"></script>
