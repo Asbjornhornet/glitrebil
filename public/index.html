@@ -1,33 +1,26 @@
 <!DOCTYPE html>
-<html lang="no">
+<html>
 <head>
-  <meta charset="UTF-8" />
   <title>Glitre Bil</title>
-  <link rel="stylesheet" href="/public/style.css" />
+  <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="logo">Glitre Bil</div>
-  <div class="menu">
-    <a href="/">Hjem</a>
+<div class="nav">
+  <strong>Glitre Bil</strong>
+  <div>
     <a href="/biler.html">Biler</a>
     <a href="/verksted.html">Verksted</a>
     <a href="/deler.html">Deler</a>
-    <a href="/fluid-film.html">Fluid Film</a>
-    <a href="/om.html">Om oss</a>
-    <a href="/kontakt.html">Kontakt</a>
+    <a href="/om-oss.html">Om oss</a>
   </div>
-</nav>
+</div>
 
-<!-- HERO -->
 <section class="hero">
-  <div class="overlay"></div>
-
   <div class="hero-content">
     <h1>Glitre Bil</h1>
-    <p>Kjøp og salg av bruktbil • Verksted • Deler</p>
+    <p>Kjøp og salg av kvalitetsbiler</p>
 
     <form id="form" class="form">
       <input id="regnr" placeholder="Skriv regnr" />
@@ -36,27 +29,15 @@
       <input id="telefon" placeholder="Telefon" />
       <input id="epost" placeholder="E-post" />
       <button>Få tilbud</button>
-
-      <div id="loading">Henter data...</div>
       <div id="result"></div>
     </form>
   </div>
 </section>
 
-<!-- BILER -->
-<section class="cars-section">
-  <h2>Biler til salgs</h2>
-  <div id="cars" class="grid"></div>
-</section>
+<h2 style="text-align:center">Biler til salgs</h2>
+<div id="cars" class="grid"></div>
 
-<!-- TJENESTER -->
-<section class="services">
-  <div class="card">🚗 Bruktbil</div>
-  <div class="card">🛠 Verksted (Bosch)</div>
-  <div class="card">🧰 Deler</div>
-  <div class="card">🛢 Fluid Film</div>
-</section>
+<script src="/script.js"></script>
 
-<script src="/public/script.js"></script>
 </body>
 </html>
