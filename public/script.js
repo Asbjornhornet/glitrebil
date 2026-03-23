@@ -1,48 +1,54 @@
-const loading = document.getElementById("loading");
-const result = document.getElementById("result");
+const carsContainer = document.getElementById("cars");
 
-// REGNR LOOKUP
-regnr.addEventListener("input", async (e) => {
-  const value = e.target.value.toUpperCase();
+async function loadCars() {
+  const res = await fetch("/api/cars");
+  const cars = await res.json();
 
-  if (value.length >= 7) {
-    loading.style.display = "block";
+  renderCars(cars);
+}
 
-    try {
-      const res = await fetch(`/api/regnr?regnr=${value}`);
-      const data = await res.json();
+function renderCars(cars) {
+  carsContainer.innerHTML = cars.map(car => `
+    <div class="card" onclick="window.open('${car.url}')">
+      <img src="${car.image}" />
+      <div class="card-content">
+        <h4>${car.title}</h4>
+        <p>${car.price}</p>
+      </div>
+    </div>
+  `).join("");
+}
 
-      if (data.model) {
-        bil.value = `${data.brand} ${data.model}`;
-        result.innerText = `${data.brand} ${data.model} (${data.year})`;
-      } else {
-        result.innerText = "Fant ikke bil";
-      }
+async function lookupRegnr(value) {
+  const res = await fetch(`/api/regnr?regnr=${value}`);
+  const data = await res.json();
 
-    } catch {
-      result.innerText = "Feil ved oppslag";
-    }
+  if(data.model){
+    document.getElementById("bil").value =
+      `${data.brand} ${data.model} (${data.year})`;
+  }
+}
 
-    loading.style.display = "none";
+document.getElementById("regnr").addEventListener("input", (e)=>{
+  if(e.target.value.length >= 7){
+    lookupRegnr(e.target.value);
   }
 });
 
-
-// SEND LEAD
-form.addEventListener("submit", async (e) => {
+document.getElementById("form").addEventListener("submit", async (e)=>{
   e.preventDefault();
 
   await fetch("/api/lead", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
+    method:"POST",
     body: JSON.stringify({
-      regnr: regnr.value,
-      bil: bil.value,
-      navn: navn.value,
-      telefon: telefon.value,
-      epost: epost.value
+      name: navn.value,
+      phone: telefon.value,
+      email: epost.value,
+      car: bil.value
     })
   });
 
-  window.location.href = "/takk.html";
+  alert("Lead sendt 🚀");
 });
+
+loadCars();
