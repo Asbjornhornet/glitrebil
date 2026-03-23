@@ -1,26 +1,40 @@
-document.getElementById('regnr').addEventListener('input', async (e) => {
-  const value = e.target.value.toUpperCase();
-  const box = document.getElementById('carInfo');
+export default async function handler(req, res) {
+  const { regnr } = req.query;
 
-  if (value.length === 7) {
-    try {
-      const res = await fetch(`/api/regnr?regnr=${value}`);
-      const data = await res.json();
+  try {
+    const response = await fetch(
+      `https://cache.api.finn.no/iad/search/car-norway?registration=${regnr}`
+    );
 
-      if (data.model) {
-        box.style.display = 'block';
-        box.innerHTML = `
-          <strong>${data.brand} ${data.model}</strong><br>
-          ${data.year} • ${data.fuel} • ${data.power}
-        `;
-      } else {
-        box.style.display = 'none';
-      }
+    const text = await response.text();
 
-    } catch (err) {
-      box.style.display = 'none';
+    // 🔥 DEBUG
+    console.log("RAW:", text.slice(0, 300));
+
+    // ❌ Hvis FINN blocker / feil
+    if (text.includes("403") || text.includes("Forbidden")) {
+      return res.status(200).json({
+        error: "FINN blokkerer request (403)"
+      });
     }
-  } else {
-    box.style.display = 'none';
+
+    // ❌ Hvis XML (ikke JSON)
+    if (text.startsWith("<?xml")) {
+      return res.status(200).json({
+        error: "Fikk XML fra FINN – ikke JSON"
+      });
+    }
+
+    const data = JSON.parse(text);
+
+    return res.status(200).json(data);
+
+  } catch (err) {
+    console.error("REGNR ERROR:", err);
+
+    return res.status(500).json({
+      error: "Server error",
+      details: err.message
+    });
   }
-});
+}
