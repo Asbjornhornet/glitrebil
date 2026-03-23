@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
   try {
-    // 🔹 Hent liste fra FINN
     const listRes = await fetch(
       'https://cache.api.finn.no/iad/search/car-norway?orgId=898948523',
       {
@@ -12,14 +11,12 @@ export default async function handler(req, res) {
 
     const xml = await listRes.text();
 
-    // 🔹 Hent ID’er
     const ids = [...xml.matchAll(/urn:id:(\d+)/g)]
       .map(m => m[1])
-      .slice(0, 10);
+      .slice(0, 8);
 
     const cars = [];
 
-    // 🔹 Hent detaljer per bil
     for (const id of ids) {
       try {
         const resAd = await fetch(
@@ -33,36 +30,21 @@ export default async function handler(req, res) {
 
         const xmlAd = await resAd.text();
 
-        // 🔥 TITLE
+        // TITLE
         const title =
           (xmlAd.match(/<title>(.*?)<\/title>/) || [])[1] || 'Bil';
 
-        // 🔥 CATEGORY PARSING (nøkkelen!)
-        const categories = [...xmlAd.matchAll(/<category[^>]*term=\"(.*?)\"[^>]*label=\"(.*?)\"/g)];
+        // 🔥 PRICE (ser etter “kr” i XML)
+        const priceMatch = xmlAd.match(/(\d[\d\s]+kr)/);
+        const price = priceMatch ? priceMatch[1] : '';
 
-        const map = {};
-        categories.forEach(c => {
-          map[c[1].toLowerCase()] = c[2];
-        });
+        // 🔥 KM (ser etter km)
+        const kmMatch = xmlAd.match(/(\d[\d\s]+km)/);
+        const km = kmMatch ? kmMatch[1] : '';
 
-        // 🔥 PRICE
-        const price =
-          map.price ||
-          map.totalprice ||
-          map.pris ||
-          '';
-
-        // 🔥 KM
-        const km =
-          map.mileage ||
-          map.kilometers ||
-          '';
-
-        // 🔥 YEAR
-        const year =
-          map.year ||
-          map.modelyear ||
-          '';
+        // 🔥 YEAR (4 siffer)
+        const yearMatch = xmlAd.match(/\b(20\d{2}|19\d{2})\b/);
+        const year = yearMatch ? yearMatch[1] : '';
 
         // 🔥 IMAGE
         const image =
