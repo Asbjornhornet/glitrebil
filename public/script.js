@@ -1,11 +1,22 @@
+const container = document.getElementById("cars");
+
+/* LOADING */
+function showSkeleton() {
+  container.innerHTML = `
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  `;
+}
+
 async function loadCars() {
+  showSkeleton();
+
   const res = await fetch("/api/cars");
   const cars = await res.json();
 
-  const container = document.getElementById("cars");
-
   container.innerHTML = cars.map(car => `
-    <div class="card" onclick="window.open('${car.url}')">
+    <div class="card">
       <img src="${car.image}" />
       <div class="card-content">
         <h3>${car.title}</h3>
@@ -13,33 +24,46 @@ async function loadCars() {
       </div>
     </div>
   `).join("");
+
+  revealCards();
 }
 
-/* REGNR LOOKUP */
+/* SCROLL ANIMATION */
+function revealCards() {
+  const cards = document.querySelectorAll(".card");
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add("visible");
+      }
+    });
+  });
+
+  cards.forEach(card => observer.observe(card));
+}
+
+/* REGNR */
 document.getElementById("regnr").addEventListener("input", async (e) => {
   const value = e.target.value.toUpperCase();
 
-  if (value.length === 7) {
-    try {
-      const res = await fetch(`/api/regnr?regnr=${value}`);
-      const data = await res.json();
+  if(value.length === 7){
+    const res = await fetch(`/api/regnr?regnr=${value}`);
+    const data = await res.json();
 
-      if (data.model) {
-        document.getElementById("bil").value =
-          `${data.brand} ${data.model} (${data.year})`;
-      }
-    } catch {
-      console.log("lookup feil");
+    if(data.model){
+      document.getElementById("bil").value =
+        `${data.brand} ${data.model} (${data.year})`;
     }
   }
 });
 
-/* SEND LEAD */
+/* LEAD */
 document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   await fetch("/api/lead", {
-    method: "POST",
+    method:"POST",
     body: JSON.stringify({
       name: navn.value,
       phone: telefon.value,
@@ -48,7 +72,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     })
   });
 
-  alert("Takk! Vi kontakter deg 🚀");
+  alert("🔥 Vi kontakter deg straks!");
 });
 
 loadCars();
