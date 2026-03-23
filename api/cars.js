@@ -4,13 +4,21 @@ export default async function handler(req, res) {
       'https://cache.api.finn.no/iad/search?orgId=898948523',
       {
         headers: {
-          'X-FINN-apikey': process.env.FINN_API_KEY
+          'X-FINN-apikey': process.env.FINN_API_KEY,
+          'Accept': 'application/json'
         }
       }
     );
 
+    // 👉 SJEKK STATUS FØR JSON
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('FINN ERROR RAW:', text);
+      return res.status(500).json({ error: 'FINN API error', raw: text });
+    }
+
     const data = await response.json();
-    console.log('FINN DATA:', data);
+    console.log('FINN OK:', data);
 
     const items = data._embedded?.items || [];
 
@@ -25,7 +33,7 @@ export default async function handler(req, res) {
     res.status(200).json(cars);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch FINN data' });
+    console.error('SERVER ERROR:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 }
