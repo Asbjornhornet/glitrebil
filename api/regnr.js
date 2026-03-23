@@ -12,7 +12,6 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
-
     const vehicle = data.kjoretoydataListe?.[0];
 
     if (!vehicle) {
@@ -29,6 +28,7 @@ export default async function handler(req, res) {
       fuel:
         vehicle.kjoretoyId?.tekniskGodkjenning?.tekniskeData?.motorOgDrivverk?.drivstoff?.drivstoffKode,
     });
+
   } catch (err) {
     return res.status(500).json({ error: "Server error" });
   }
