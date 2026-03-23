@@ -11,35 +11,43 @@ export default async function handler(req, res) {
 
     const xml = await listRes.text();
 
-    const ids = [...xml.matchAll(/urn:id:(\\d+)/g)].map(m => m[1]).slice(0, 12);
+    const ids = [...xml.matchAll(/urn:id:(\d+)/g)]
+      .map(m => m[1])
+      .slice(0, 8); // start med færre
 
-    const cars = await Promise.all(ids.map(async (id) => {
+    const cars = [];
+
+    for (const id of ids) {
       try {
-        const res = await fetch(`https://cache.api.finn.no/iad/ad/${id}`, {
-          headers: {
-            'X-FINN-apikey': process.env.FINN_API_KEY
+        const resAd = await fetch(
+          `https://cache.api.finn.no/iad/ad/${id}`,
+          {
+            headers: {
+              'X-FINN-apikey': process.env.FINN_API_KEY
+            }
           }
-        });
+        );
 
-        const xml = await res.text();
+        const xmlAd = await resAd.text();
 
-        const title = xml.match(/<title>(.*?)<\\/title>/)?.[1] || '';
-        const price = xml.match(/<finn:price[^>]*>(.*?)<\\/finn:price>/)?.[1] || '';
-        const image = xml.match(/<link rel=\"image\" href=\"(.*?)\"/)?.[1] || '';
-        const year = xml.match(/<finn:year>(.*?)<\\/finn:year>/)?.[1] || '';
-        const km = xml.match(/<finn:mileage>(.*?)<\\/finn:mileage>/)?.[1] || '';
+        // 🔥 safe parsing
+        const title = (xmlAd.match(/<title>(.*?)<\/title>/) || [])[1] || '';
+        const price = (xmlAd.match(/<finn:price[^>]*>(.*?)<\/finn:price>/) || [])[1] || '';
+        const image = (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] || '';
+        const year = (xmlAd.match(/<finn:year>(.*?)<\/finn:year>/) || [])[1] || '';
+        const km = (xmlAd.match(/<finn:mileage>(.*?)<\/finn:mileage>/) || [])[1] || '';
 
-        return { id, title, price, image, year, km };
+        cars.push({ id, title, price, image, year, km });
 
-      } catch {
-        return null;
+      } catch (err) {
+        console.log('FEIL PÅ BIL:', id);
       }
-    }));
+    }
 
-    res.status(200).json(cars.filter(Boolean));
+    res.status(200).json(cars);
 
   } catch (err) {
-    console.error(err);
+    console.error('TOTAL ERROR:', err);
     res.status(500).json({ error: 'fail' });
   }
 }
