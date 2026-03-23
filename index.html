@@ -1,226 +1,151 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Glitre Bil</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #020617;
+      color: white;
+      text-align: center;
+    }
 
-<title>Glitre Bil</title>
+    .hero {
+      padding: 100px 20px;
+    }
 
-<style>
-body {
-  margin:0;
-  font-family: system-ui, Arial;
-  background:#020617;
-  color:white;
-}
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
 
-/* 🔥 HERO */
-.hero {
-  height:70vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  background:
-    linear-gradient(rgba(2,6,23,0.8), rgba(2,6,23,1)),
-    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70');
-  background-size:cover;
-  background-position:center;
-  text-align:center;
-}
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 12px;
+      width: 300px;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.2s ease;
+    }
 
-.hero h1 {
-  font-size:56px;
-  margin:0;
-}
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-.hero p {
-  opacity:0.7;
-}
+    button:hover {
+      transform: scale(1.05);
+    }
 
-/* 🔥 FORM */
-form {
-  margin-top:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  width:320px;
-}
-
-input, button {
-  padding:14px;
-  border-radius:8px;
-  border:none;
-}
-
-input {
-  background:#111827;
-  color:white;
-}
-
-button {
-  background:linear-gradient(90deg,#2563eb,#3b82f6);
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-/* 🔥 SECTION */
-.section {
-  max-width:1200px;
-  margin:auto;
-  padding:60px 20px;
-}
-
-h2 {
-  text-align:center;
-  margin-bottom:40px;
-}
-
-/* 🔥 GRID */
-.grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:25px;
-}
-
-/* 🔥 CARD */
-.card {
-  background:#111827;
-  border-radius:18px;
-  overflow:hidden;
-  transition:0.3s;
-  cursor:pointer;
-}
-
-.card:hover {
-  transform:translateY(-6px);
-}
-
-.card img {
-  width:100%;
-  height:220px;
-  object-fit:cover;
-}
-
-.card-content {
-  padding:18px;
-}
-
-.card h3 {
-  margin:0 0 10px;
-  font-size:17px;
-}
-
-.meta {
-  color:#9ca3af;
-  font-size:14px;
-  margin-bottom:10px;
-}
-
-.price {
-  font-size:22px;
-  font-weight:bold;
-}
-
-/* 🔥 BADGE */
-.badge {
-  position:absolute;
-  background:#2563eb;
-  padding:6px 10px;
-  border-radius:8px;
-  font-size:12px;
-  top:10px;
-  left:10px;
-}
-
-.card-wrapper {
-  position:relative;
-}
-</style>
+    #carInfo {
+      margin-top: 10px;
+      color: #93c5fd;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- 🔥 HERO -->
-<div class="hero">
-  <h1>Glitre Bil</h1>
-  <p>Gratis verdivurdering • Rask respons</p>
+  <div class="hero">
+    <h1>Glitre Bil</h1>
+    <p>Gratis verdivurdering • Rask respons</p>
 
-  <form>
-<input id="regnr" placeholder="AB12345" />
-<input id="car" placeholder="Bil" />
-<input id="name" placeholder="Navn" />
-<input id="phone" placeholder="Telefon" />
-<input id="email" placeholder="E-post" />
+    <input id="regnr" placeholder="AB12345" />
+    <input id="car" placeholder="Bil" />
+    <input id="name" placeholder="Navn" />
+    <input id="phone" placeholder="Telefon" />
+    <input id="email" placeholder="E-post" />
 
-<button id="submitBtn">Få tilbud</button>
+    <button id="submitBtn">Få tilbud</button>
 
-<div id="carInfo"></div>
-  </form>
-</div>
+    <div id="carInfo"></div>
+  </div>
 
-<!-- 🔥 BILER -->
-<div class="section">
-  <h2>Biler til salgs</h2>
-  <div id="cars" class="grid"></div>
-</div>
+  <script>
+    const regnrInput = document.getElementById("regnr");
+    const carInput = document.getElementById("car");
+    const info = document.getElementById("carInfo");
 
-<script>
-  document.getElementById('regnr').addEventListener('input', async (e) => {
-  const value = e.target.value.toUpperCase();
-
-  if (value.length === 7) {
-    try {
-      const res = await fetch(`/api/regnr?regnr=${value}`);
-      const data = await res.json();
-
-      if (data.model) {
-        alert(
-          `${data.brand} ${data.model} (${data.year})\n${data.fuel} • ${data.power}`
-        );
+    function setLoading(state) {
+      if (state) {
+        regnrInput.style.border = "2px solid #3b82f6";
+        regnrInput.style.boxShadow = "0 0 20px rgba(59,130,246,0.5)";
+      } else {
+        regnrInput.style.border = "";
+        regnrInput.style.boxShadow = "";
       }
-
-    } catch (err) {
-      console.log('lookup feil');
     }
-  }
-});
-async function loadCars() {
-  try {
-    const res = await fetch('/api/cars');
-    const cars = await res.json();
 
-    const container = document.getElementById('cars');
+    // 🚗 LOOKUP
+    regnrInput.addEventListener("input", async (e) => {
+      const value = e.target.value.toUpperCase();
 
-    container.innerHTML = cars.map(car => `
-      <div class="card" onclick="window.open('${car.url}', '_blank')">
+      if (value.length === 7) {
+        setLoading(true);
 
-        <div class="card-wrapper">
-          <div class="badge">Til salgs</div>
-          <img src="${car.image}" />
-        </div>
+        try {
+          const res = await fetch(`/api/regnr?regnr=${value}`);
+          const data = await res.json();
 
-        <div class="card-content">
-          <h3>${car.title}</h3>
+          setLoading(false);
 
-          <div class="meta">
-            ${car.year} ${car.km ? '• ' + car.km : ''}
-          </div>
+          if (data.error) {
+            info.innerText = "Fant ikke bil";
+            return;
+          }
 
-          <div class="price">${car.price}</div>
-        </div>
+          const carText = `${data.brand} ${data.model}`;
+          carInput.value = carText;
 
-      </div>
-    `).join('');
+          // ✨ animation
+          carInput.style.transform = "scale(1.05)";
+          setTimeout(() => {
+            carInput.style.transform = "scale(1)";
+          }, 200);
 
-  } catch (err) {
-    document.getElementById('cars').innerHTML = "Kunne ikke laste biler";
-  }
-}
+          info.innerText = `${carText} (${data.year})`;
 
-loadCars();
-</script>
+        } catch (err) {
+          setLoading(false);
+          info.innerText = "Feil ved lookup";
+        }
+      }
+    });
+
+    // 📤 SEND LEAD
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const payload = {
+        regnr: regnrInput.value,
+        car: carInput.value,
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+      };
+
+      const btn = document.getElementById("submitBtn");
+
+      btn.innerText = "Sender...";
+      btn.disabled = true;
+
+      await fetch("/api/lead", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      btn.innerText = "Sendt ✅";
+    });
+  </script>
 
 </body>
 </html>
