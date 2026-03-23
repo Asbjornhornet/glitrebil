@@ -22,20 +22,28 @@ export default async function handler(req, res) {
         const pageRes = await fetch(`https://www.finn.no/mobility/item/${id}`);
         const html = await pageRes.text();
 
-        const title =
-          (html.match(/<title>(.*?)<\/title>/) || [])[1]?.split('|')[0] || 'Bil';
+        // 🔥 Tittel
+        const rawTitle = (html.match(/<title>(.*?)<\/title>/) || [])[1] || '';
+        const title = rawTitle
+          .replace('Bruktbil til salgs:', '')
+          .split('|')[0]
+          .trim();
 
-        const price =
-          (html.match(/(\d[\d\s]+kr)/) || [])[1] || '';
+        // 🔥 Pris
+        const priceMatch = html.match(/(\d[\d\s]+)/);
+        const price = priceMatch ? priceMatch[1] + ' kr' : '';
 
+        // 🔥 KM
         const km =
           (html.match(/(\d[\d\s]+km)/) || [])[1] || '';
 
+        // 🔥 År
         const year =
           (html.match(/\b(20\d{2}|19\d{2})\b/) || [])[1] || '';
 
+        // 🔥 Bilde
         const image =
-          (html.match(/property=\"og:image\" content=\"(.*?)\"/) || [])[1] || '';
+          (html.match(/property="og:image" content="(.*?)"/) || [])[1] || '';
 
         cars.push({
           id,
@@ -43,7 +51,8 @@ export default async function handler(req, res) {
           price,
           image,
           year,
-          km
+          km,
+          url: `https://www.finn.no/mobility/item/${id}`
         });
 
       } catch (err) {
