@@ -1,5 +1,6 @@
 export default async function handler(req, res) {
   try {
+    // 🔹 Hent liste fra FINN
     const listRes = await fetch(
       'https://cache.api.finn.no/iad/search/car-norway?orgId=898948523',
       {
@@ -11,12 +12,14 @@ export default async function handler(req, res) {
 
     const xml = await listRes.text();
 
+    // 🔹 Hent ID’er
     const ids = [...xml.matchAll(/urn:id:(\d+)/g)]
       .map(m => m[1])
-      .slice(0, 8);
+      .slice(0, 10);
 
     const cars = [];
 
+    // 🔹 Hent detaljer per bil
     for (const id of ids) {
       try {
         const resAd = await fetch(
@@ -30,25 +33,41 @@ export default async function handler(req, res) {
 
         const xmlAd = await resAd.text();
 
-        // TITLE
+        // 🔥 TITLE
         const title =
           (xmlAd.match(/<title>(.*?)<\/title>/) || [])[1] || 'Bil';
 
-        // PRICE (fra category)
+        // 🔥 CATEGORY PARSING (nøkkelen!)
+        const categories = [...xmlAd.matchAll(/<category[^>]*term=\"(.*?)\"[^>]*label=\"(.*?)\"/g)];
+
+        const map = {};
+        categories.forEach(c => {
+          map[c[1].toLowerCase()] = c[2];
+        });
+
+        // 🔥 PRICE
         const price =
-          (xmlAd.match(/<category term=\"price\" label=\"(.*?)\"/) || [])[1] || '';
+          map.price ||
+          map.totalprice ||
+          map.pris ||
+          '';
 
-        // KM
+        // 🔥 KM
         const km =
-          (xmlAd.match(/<category term=\"mileage\" label=\"(.*?)\"/) || [])[1] || '';
+          map.mileage ||
+          map.kilometers ||
+          '';
 
-        // YEAR
+        // 🔥 YEAR
         const year =
-          (xmlAd.match(/<category term=\"year\" label=\"(.*?)\"/) || [])[1] || '';
+          map.year ||
+          map.modelyear ||
+          '';
 
-        // IMAGE (fra link)
+        // 🔥 IMAGE
         const image =
-          (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] || '';
+          (xmlAd.match(/<link rel=\"image\" href=\"(.*?)\"/) || [])[1] ||
+          '';
 
         cars.push({
           id,
@@ -67,7 +86,7 @@ export default async function handler(req, res) {
     res.status(200).json(cars);
 
   } catch (err) {
-    console.error(err);
+    console.error('TOTAL ERROR:', err);
     res.status(500).json({ error: 'fail' });
   }
 }
